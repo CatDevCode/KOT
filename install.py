@@ -24,6 +24,8 @@ libraries = [
     "pygame",
     "Pillow",
     "pyautogui",
+    "gtts",
+    "pydub",
     "pynput"
 ]
 print("-" * 90)
@@ -135,8 +137,10 @@ def main():
         os.remove(full_path)
     
 
+
+    os.system("cls")
+
     print("\n")
-    
     print("-" * 45)
     print("\n")
     print("Приятного использования KOT-а!")
