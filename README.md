@@ -1,3 +1,10 @@
+<p align="center">
+      <img src="https://i.ibb.co/r4Fm3Y2/2025-01-18-124822.png" width="400">
+</p>
+<p align="center">
+      <img src="https://img.shields.io/badge/License-GPL%203.0-blue">
+</p>
+
 # KOT - голосовой помощник
 
 KOT - это библиотека голосового помощника, которая работает с голосовыми командами без необходимости поиска и использования нейронных сетей, как, например, ChatGPT
