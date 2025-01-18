@@ -1,14 +1,25 @@
-version = "0.1.5"
-# █▀▀█  █   █ 　  █▀▀█  █▀▀█ ▀▀█▀▀ 　  █▀▀▄  █▀▀▀  █   █ 　  █▀▀█  █▀▀▀█  █▀▀▄  █▀▀▀ 　 ▄ ▀▄ 
-# █▀▀▄  █▄▄▄█ 　  █     █▄▄█   █   　  █  █  █▀▀▀   █ █  　  █     █   █  █  █  █▀▀▀ 　    █ 
-# █▄▄█    █   　  █▄▄█  █  █   █   　  █▄▄▀  █▄▄▄   ▀▄▀  　  █▄▄█  █▄▄▄█  █▄▄▀  █▄▄▄ 　 ▀ ▄▀
+version = "0.2.8"
+
+print("\n")
+print("█▀▀█  █   █ 　  █▀▀█  █▀▀█ ▀▀█▀▀ 　  █▀▀▄  █▀▀▀  █   █ 　  █▀▀█  █▀▀▀█  █▀▀▄  █▀▀▀ 　 ▄ ▀▄ ")
+print("█▀▀▄  █▄▄▄█ 　  █     █▄▄█   █   　  █  █  █▀▀▀   █ █  　  █     █   █  █  █  █▀▀▀ 　    █ ")
+print("█▄▄█    █   　  █▄▄█  █  █   █   　  █▄▄▀  █▄▄▄   ▀▄▀  　  █▄▄█  █▄▄▄█  █▄▄▀  █▄▄▄ 　 ▀ ▄▀ ")
+print("\n")
+print("Начало загрузки библиотек:")
+print("\n")
+
+debug_log = False
+
+if debug_log == True:
+    print("\n")
+    print("Debug: Запущено логирование.")
+    print("\n")
 
 import os
 import pyaudio
 import json
 import threading
 import webbrowser
-from datetime import datetime
 from vosk import Model, KaldiRecognizer
 import pygame
 import logging
@@ -17,6 +28,10 @@ from PIL import Image, ImageTk
 import pyautogui as pg
 from pynput.keyboard import Controller, Key
 import time
+from gtts import gTTS
+from pydub import AudioSegment
+import requests
+
 
 keyboard = Controller()
 
@@ -83,11 +98,22 @@ class CatWidget:
                 if len(position) == 2:
                     x, y = map(int, position)
                     self.root.geometry(f"+{x}+{y}")
-                    logging.info(f"Позиция кота загружена: ({x}, {y})")
+                    if debug_log == True:
+                        logging.info(f"Позиция кота загружена: ({x}, {y})")
         except FileNotFoundError:
-            logging.warning("Файл с позицией не найден. Используется стандартное положение.")
+            os.system("cls")
+            if debug_log == True:
+                logging.warning("Файл с позицией не найден! Создайте папку (Kot Files) и создайте файл (cat_position.txt). Пока используется стандартное положение.")
+            print("\n")
+            print("Файл с позицией не найден! Создайте папку (Kot Files) и создайте файл (cat_position.txt). Пока используется стандартное положение.")
+            print("\n")
+            print("time.sleep(10) --> main()")
+            print("\n")
+            time.sleep(10)
+            os.system("cls")
+            
         except Exception as e:
-            logging.error(f"Ошибка при загрузке позиции: {e}")
+            logging.error(f"Ошибка при загрузке позиции: {e} -->")
 
     def save_position(self):
         x = self.root.winfo_x()
@@ -95,6 +121,26 @@ class CatWidget:
         with open(POSITION_FILE, 'w') as f:
             f.write(f"{x},{y}")
             logging.info(f"Позиция кота сохранена: ({x}, {y})")
+
+    def speak(self, text):
+        tts = gTTS(text=text, lang='ru')
+        tts.save("cat_speech.mp3")
+
+        sound = AudioSegment.from_file("cat_speech.mp3")
+
+        octaves = 0.5
+        new_sample_rate = int(sound.frame_rate * (2.0 ** octaves))
+        high_pitch_sound = sound._spawn(sound.raw_data, overrides={'frame_rate': new_sample_rate})
+
+        high_pitch_sound.export("cat_speech_high_pitch.mp3", format="mp3")
+
+        cat_sound = pygame.mixer.Sound("cat_speech_high_pitch.mp3")
+        cat_sound.play()
+        self.open_mouth()
+
+
+        while pygame.mixer.get_busy():
+            pygame.time.Clock().tick(10)
 
 class VoiceAssistant:
     def __init__(self):
@@ -109,10 +155,17 @@ class VoiceAssistant:
     def load_model(self):
         try:
             model = Model(MODEL_PATH)
-            logging.info("Модель загружена успешно.")
+            if debug_log == True:
+                logging.info("Модель загружена успешно. --> return model")
             return model
         except Exception as e:
-            logging.error(f"Ошибка при загрузке модели: {e}")
+            print("\n")
+            if debug_log == True:
+                logging.error(f"Ошибка при загрузке модели: {e}. --> time.sleep(10) --> exit(1)")
+            print(f"Ошибка при загрузке модели: {e}. --> time.sleep(10) --> exit(1)")
+            print("\n")
+            time.sleep(10)
+            os.system("cls")
             exit(1)
 
     def open_microphone(self):
@@ -122,7 +175,13 @@ class VoiceAssistant:
             logging.info("Микрофон открыт успешно.")
             return stream
         except Exception as e:
-            logging.error(f"Ошибка при открытии микрофона: {e}")
+            print("\n")
+            if debug_log == True:
+                logging.error(f"Ошибка при открытии микрофона: {e}. --> time.sleep(10) --> exit(1)")
+            print(f"Ошибка при открытии микрофона: {e}. --> time.sleep(10) --> exit(1)")
+            print("\n")
+            time.sleep(10)
+            os.system("cls")
             exit(1)
 
     def load_custom_commands(self):
@@ -141,6 +200,7 @@ class VoiceAssistant:
         logging.info(f"Добавлена новая команда: {command} -> {actions}")
 
     def recognize_speech_from_mic(self):
+        os.system("cls")
         logging.info("Ассистент готов к распознаванию речи.")
         print("Скажите команду...")
         while self.running:
@@ -155,10 +215,10 @@ class VoiceAssistant:
                             print(f"Вы сказали: {spoken_text}")
                             self.process_command(spoken_text)
             except Exception as e:
-                logging.error(f"Ошибка при распознавании речи: {e}")
+                logging.error(f"Ошибка при распознавании речи: {e} --> ")
 
     def process_command(self, spoken_text):
-        activators = ["кот ", "котик ", "котяра ", "киса ", "код ", "коды "]
+        activators = ["кот ", "котик ", "котяра ", "киса ", "код ", "коды ", "котс", "кодс"]
         if any(activator in spoken_text for activator in activators):
             for activator in activators:
                 spoken_text = spoken_text.replace(activator, "").strip()
@@ -213,11 +273,6 @@ class VoiceAssistant:
                 os.system("nircmd.exe sendkeypress alt+f4")
                 command_found = True
                 logging.info("Закрываю окно.")
-            elif 'найди' in spoken_text:
-                search_query = spoken_text.replace('найди', '').strip()
-                webbrowser.open(f"https://www.google.com/search?q={search_query}")
-                logging.info(f"Ищу в интернете: {search_query}")
-                command_found = True
             elif 'открой браузер' in spoken_text:
                 webbrowser.open("https://")
                 command_found = True
@@ -281,8 +336,9 @@ class VoiceAssistant:
             elif spoken_text.startswith('види '):
                 text_to_type = spoken_text.replace('види ', '', 1).strip()
 
-                logging.info(f"Тип переменной text_to_type: {type(text_to_type)}")
-                logging.info(f"Содержимое text_to_type: '{text_to_type}'")
+                if debug_log == True:
+                    logging.info(f"Тип переменной text_to_type: {type(text_to_type)}")
+                    logging.info(f"Содержимое text_to_type: '{text_to_type}'")
 
                 for char in text_to_type:
                   keyboard.press(char)
@@ -310,7 +366,7 @@ class VoiceAssistant:
                 webbrowser.open("https://www.youtube.com/watch?v=TY2eYw-48Bo&ab_channel=JoshuaLawter")
                 command_found = True
                 logging.info("Открываю новогоднюю музыку.")
-            elif 'что такое' in spoken_text or 'объясни' in spoken_text:
+            elif 'что такое' in spoken_text:
                 query = spoken_text.replace('что такое', '').strip()
                 webbrowser.open(f"https://ru.wikipedia.org/wiki/{query}")
                 command_found = True
@@ -350,6 +406,25 @@ class VoiceAssistant:
                 command_found = True
                 logging.info("Кот убран с переднего плана.")
                 print("Кот убран с переднего плана.")
+            elif 'расскажи факт' in spoken_text or 'расскажи факт о котах' in spoken_text:
+                self.tell_cat_fact()
+                command_found = True
+                logging.info("Рассказываю факт о котах.")
+            elif 'скажи' in spoken_text:
+                text_to_say = spoken_text.replace('скажи', '').strip()
+                if text_to_say:
+                    self.cat_widget.speak(text_to_say)
+                    command_found = True
+                    logging.info(f"Повторяю: {text_to_say}")
+            elif 'отмени' in spoken_text or 'отмена' in spoken_text or 'отмени действие' in spoken_text:
+                os.system("nircmd.exe sendkeypress ctrl+z")
+                command_found = True
+                logging.info("Отменяю действие.")
+            elif 'найди' in spoken_text:
+                query = spoken_text.replace('найди', '').strip()
+                webbrowser.open(f"https://www.google.com/search?q={query}")
+                command_found = True
+                logging.info(f"Ищу в Google: {query}.")
             else:
                 if spoken_text in self.custom_commands:
                     actions = self.custom_commands[spoken_text]
@@ -368,13 +443,24 @@ class VoiceAssistant:
                 logging.warning("Команда не распознана.")
                 print("Команда не распознана.")
 
-    def stop(self):
-        self.running = False
-        self.stream.stop_stream()
-        self.stream.close()
-        self.mic.terminate()
-        logging.info("Ассистент остановлен.")
+    def tell_cat_fact(self):
+        url = "https://catfact.ninja/fact"
+        response = requests.get(url)
+        data = response.json()
+        fact = data['fact']
+        
+        translated_fact = self.translate(fact, "ru")
+    
+        self.cat_widget.speak(translated_fact)
 
+    def translate(self, text, target_language):
+        url = f"https://api.mymemory.translated.net/get?q={text}&langpair=en|{target_language}"
+        response = requests.get(url)
+        data = response.json()
+        if 'responseData' in data and 'translatedText' in data['responseData']:
+            return data['responseData']['translatedText']
+        else:
+            return "Ошибка перевода: ключ 'translatedText' отсутствует. --> return <-- выход из метода"
 
 def main():
     assistant = VoiceAssistant()
