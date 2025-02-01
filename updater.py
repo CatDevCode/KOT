@@ -84,7 +84,7 @@ class VersionChecker:
             print("\n")
             print("-" * 50)
 
-url = "https://raw.githubusercontent.com/CatDevCode/KOT/c59b4aa49b212fd2e62217f85537d33182aa3b64/KOT.py"
+url = "https://raw.githubusercontent.com/CatDevCode/KOT/refs/heads/main/KOT.py"
 print("Debug: Cыллка: ", url)
 current_version = "0.2.8"
 print("Debug: Версия установленная: ", current_version)
